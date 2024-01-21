@@ -257,7 +257,6 @@ export const uploadAvatar = async (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).json({ message: "No file provided" });
     }
-    
 
     const file = req.files.file;
 
@@ -363,4 +362,29 @@ export const getUser = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Error retrieving user" });
   }
-}
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error retrieving users" });
+  }
+};
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } else {
+      return res.json({ user });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error retrieving user" });
+  }
+};
