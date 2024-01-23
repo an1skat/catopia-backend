@@ -13,6 +13,16 @@ let savedCode;
 let userMail;
 const AVATAR_PATH = "./uploads/";
 
+const decoderToken = (token) => {
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+    return decodedToken._id;
+  } catch (err) {
+    console.error("Ошибка при извлечении идентификатора пользователя:", error);
+    return null;
+  }
+};
+
 export const register = async (req, res) => {
   console.log(req.body);
   console.log(req.body.password);
@@ -272,7 +282,7 @@ export const uploadAvatar = async (req, res) => {
     // Получаем директорию controllers
     const controllersDir = path.dirname(currentFilePath);
     // Получаем корневую директорию проекта
-    const projectDir = path.resolve(controllersDir, '..');
+    const projectDir = path.resolve(controllersDir, "..");
     // Собираем путь к папке uploads
     const AVATAR_PATH = path.resolve(projectDir, "uploads");
 
@@ -362,7 +372,7 @@ export const getUser = async (req, res) => {
   try {
     const userId = req.params.userId;
     const user = await UserModel.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -383,10 +393,10 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Error retrieving users" });
   }
 };
-export const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res, next) => {
   try {
-    const userId = req.userId;
-    console.log(userId);
+    const token = req.headers.authorization.split(' ')[1];
+    const userId = decoderToken(token);;
     const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
