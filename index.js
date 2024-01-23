@@ -199,9 +199,9 @@ app.delete("/post/:postId/delete", checkAuth, postController.deletePost);
 // Гет запросы
 app.get("/posts", postController.getPosts);
 app.get("/getAvatar", checkAuth, userController.getAvatar);
-app.get("/getUser", checkAuth, userController.getUser);
+app.get("/getUser/:userId", userController.getUser);
 app.get("/getAllUsers", userController.getAllUsers);
-app.get("/getUser/:id", userController.getUserProfile);
+app.get("/getUser", userController.getUserProfile);
 
 // Пасспорт
 app.get(

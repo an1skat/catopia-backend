@@ -6,6 +6,7 @@ import UserModel from "../models/User.js";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 dotenv.config();
 
 let savedCode;
@@ -255,7 +256,7 @@ export const uploadAvatar = async (req, res) => {
     const fileName = uuidv4() + ".jpg";
 
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ message: "No file provided" });
+      return res.status(400).json({ message: "Файл не предоставлен" });
     }
 
     const file = req.files.file;
@@ -264,31 +265,37 @@ export const uploadAvatar = async (req, res) => {
     if (fileExtension !== ".jpg" && fileExtension !== ".png") {
       return res
         .status(400)
-        .json({ message: "Only .jpg and .png files are allowed" });
+        .json({ message: "Разрешены только файлы с расширением .jpg и .png" });
     }
-    console.log(AVATAR_PATH);
+
+    const currentFilePath = fileURLToPath(import.meta.url);
+    // Получаем директорию controllers
+    const controllersDir = path.dirname(currentFilePath);
+    // Получаем корневую директорию проекта
+    const projectDir = path.resolve(controllersDir, '..');
+    // Собираем путь к папке uploads
+    const AVATAR_PATH = path.resolve(projectDir, "uploads");
 
     const filePath = path.resolve(AVATAR_PATH, fileName);
-    console.log(filePath);
 
     file.mv(filePath, (err) => {
-      console.log(err, filePath);
       if (err) {
         console.error(err);
-        return res.status(500).json({ message: "Error uploading file" });
+        return res.status(500).json({ message: "Ошибка загрузки файла" });
       }
 
       user.avatar = fileName;
       user.save();
 
       return res.json({
-        message: "Avatar uploaded",
+        message: "Аватар загружен",
+        filePath: filePath, // Добавляем путь к файлу в ответ
       });
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Can't upload avatar",
+      message: "Не удалось загрузить аватар",
     });
   }
 };
@@ -353,10 +360,13 @@ export const getAvatar = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId);
+    const userId = req.params.userId;
+    const user = await UserModel.findById(userId);
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     res.json({ user });
   } catch (err) {
     console.error(err);
@@ -375,14 +385,13 @@ export const getAllUsers = async (req, res) => {
 };
 export const getUserProfile = async (req, res) => {
   try {
-    const userId = req.params.id;
-
+    const userId = req.userId;
+    console.log(userId);
     const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    } else {
-      return res.json({ user });
     }
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error retrieving user" });
