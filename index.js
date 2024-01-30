@@ -17,6 +17,18 @@ import GoogleStrategy from "passport-google-oauth20";
 import User from "./models/User.js";
 import session from "express-session";
 import bcrypt from "bcrypt";
+import { Readable } from "stream";
+import { MongoClient, ObjectId } from "mongodb";
+const conn = mongoose.connection;
+let gfs;
+
+conn.once("open", () => {
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: "avatars", // ваше имя коллекции GridFS
+  });
+
+  console.log("GridFS initialized");
+});
 
 dotenv.config();
 
@@ -181,7 +193,7 @@ app.post(
   "/register",
   registerValidation,
   handleValidationErrors,
-  passport.authenticate("google", { scope: ["profile"] })
+  userController.register
 );
 app.post("/auth/me", checkAuth, userController.getMe);
 app.post("/profile/upload", checkAuth, userController.uploadAvatar);
@@ -198,7 +210,6 @@ app.delete("/post/:postId/delete", checkAuth, postController.deletePost);
 
 // Гет запросы
 app.get("/posts", postController.getPosts);
-app.get("/getAvatar", checkAuth, userController.getAvatar);
 app.get("/getUser/:userId", userController.getUser);
 app.get("/getAllUsers", userController.getAllUsers);
 app.get("/getUser", userController.getUserProfile);
