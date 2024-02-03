@@ -9,6 +9,7 @@ import handleValidationErrors from "./utils/handleValidationErrors.js";
 import checkAuth from "./utils/checkAuth.js";
 import * as userController from "./controllers/userControllers.js";
 import * as postController from "./controllers/postControllers.js";
+import * as commentsController from "./controllers/commentsControllers.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import { fileURLToPath } from "url";
@@ -17,18 +18,6 @@ import GoogleStrategy from "passport-google-oauth20";
 import User from "./models/User.js";
 import session from "express-session";
 import bcrypt from "bcrypt";
-import { Readable } from "stream";
-import { MongoClient, ObjectId } from "mongodb";
-const conn = mongoose.connection;
-let gfs;
-
-conn.once("open", () => {
-  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
-    bucketName: "avatars", // ваше имя коллекции GridFS
-  });
-
-  console.log("GridFS initialized");
-});
 
 dotenv.config();
 
@@ -200,6 +189,7 @@ app.post("/profile/upload", checkAuth, userController.uploadAvatar);
 app.post("/forgot-password", userController.sendConfirm);
 app.post("/confirm", userController.verifyCode);
 app.post("/post/create", checkAuth, postController.createPost);
+app.post("/comment/create", checkAuth, commentsController.createComment);
 
 // Патч запросы
 app.patch("/change-password", userController.changePassword);
@@ -207,12 +197,15 @@ app.patch("/change-password", userController.changePassword);
 // Делит запросы
 app.delete("/profile/delete", checkAuth, userController.deleteAvatar);
 app.delete("/post/:postId/delete", checkAuth, postController.deletePost);
+app.delete("/comment/:commentId/delete", checkAuth, commentsController.deleteComment);
 
 // Гет запросы
 app.get("/posts", postController.getPosts);
 app.get("/getUser/:userId", userController.getUser);
 app.get("/getAllUsers", userController.getAllUsers);
 app.get("/getUser", userController.getUserProfile);
+app.get("/comment/:commentId/add/", checkAuth, commentsController.addLike);
+app.get("/comment/:commentId/del/", checkAuth, commentsController.delLike);
 
 // Пасспорт
 app.get(

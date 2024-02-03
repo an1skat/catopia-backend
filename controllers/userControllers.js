@@ -17,7 +17,7 @@ const decoderToken = (token) => {
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_KEY);
     return decodedToken._id;
-  } catch (err) {
+  } catch (error) {
     console.error("Ошибка при извлечении идентификатора пользователя:", error);
     return null;
   }
