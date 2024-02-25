@@ -11,7 +11,6 @@ export const createComment = async (req, res) => {
 
     const doc = new CommentModel({
       text: req.body.text,
-      likes: 0,
       user: user,
     });
 
@@ -53,41 +52,51 @@ export const deleteComment = async (req, res) => {
 
 export const addLike = async (req, res) => {
   try {
-    const commentId = req.params.commentId;
+    const { commentId } = req.params;
+    const userId = req.userId; 
     const comment = await CommentModel.findById(commentId);
-    console.log("Comment:", comment);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    comment.likes++;
+    console.log("Comment:", comment);
+    comment.likes.count++;
+    comment.likes.users.push(userId);
     await comment.save();
-    res.json("Like added");
+    return res.status(200).json({ comment });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error adding like" });
+    console.error("Error adding like to comment:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 export const delLike = async (req, res) => {
   try {
-    const commentId = req.params.commentId;
+    const { commentId } = req.params;
+    const userId = req.userId; 
+
     const comment = await CommentModel.findById(commentId);
-    console.log("Comment:", comment);
+
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    comment.likes--;
+
+    console.log("Comment:", comment);
+    let userIndex = comment.likes.users.indexOf(userId);
+    comment.likes.count--;
+    if (userIndex !== -1) {
+      comment.likes.users.splice(userIndex, 1);
+    } else {
+      return res.status(404).json({ message: "User not found in likes" });
+    }
     await comment.save();
-    res.json("Like removed");
+    return res.status(200).json({ comment });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error adding like" });
+    console.error("Error adding like to comment:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 export const getComment = async (req, res) => {
   try {
-    console.log("req.params:", req.params);
-    console.log("req.params.commentId:", req.params.commentId);
     const commentId = req.params.commentId;
     const comment = await CommentModel.findById(commentId);
     if (!comment) {
