@@ -39,7 +39,7 @@ userSchema.statics.findOrCreate = async function(query) {
     return newUser;
   } catch (err) {
     console.error(err);
-    throw err; // Re-throw the error to handle it appropriately
+    throw err; 
   }
 };
 

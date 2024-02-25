@@ -197,7 +197,11 @@ app.patch("/change-password", userController.changePassword);
 // Делит запросы
 app.delete("/profile/delete", checkAuth, userController.deleteAvatar);
 app.delete("/post/:postId/delete", checkAuth, postController.deletePost);
-app.delete("/comment/:commentId/delete", checkAuth, commentsController.deleteComment);
+app.delete(
+  "/comment/:commentId/delete",
+  checkAuth,
+  commentsController.deleteComment
+);
 
 // Гет запросы
 app.get("/posts", postController.getPosts);
@@ -206,6 +210,8 @@ app.get("/getAllUsers", userController.getAllUsers);
 app.get("/getUser", userController.getUserProfile);
 app.get("/comment/:commentId/add/", checkAuth, commentsController.addLike);
 app.get("/comment/:commentId/del/", checkAuth, commentsController.delLike);
+app.get("/comment/:commentId/get", commentsController.getComment);
+app.get("/comments/ids", commentsController.getComments);
 
 // Пасспорт
 app.get(

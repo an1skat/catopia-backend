@@ -393,10 +393,10 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Error retrieving users" });
   }
 };
-export const getUserProfile = async (req, res, next) => {
+export const getUserProfile = async (req, res) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
-    const userId = decoderToken(token);;
+    const userId = decoderToken(token);
     const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });

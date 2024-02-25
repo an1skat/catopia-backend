@@ -83,3 +83,32 @@ export const delLike = async (req, res) => {
     res.status(500).json({ message: "Error adding like" });
   }
 };
+
+export const getComment = async (req, res) => {
+  try {
+    console.log("req.params:", req.params);
+    console.log("req.params.commentId:", req.params.commentId);
+    const commentId = req.params.commentId;
+    const comment = await CommentModel.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+    const user = await UserModel.findById(comment.user);
+    res.json({
+      "comment": comment,
+      "user": user
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error getting comment" });
+  }
+}
+export const getComments = async (req, res) => {
+  try {
+    const commentIds = await CommentModel.find().distinct("_id");
+    res.json({ commentIds });
+  } catch (error) {
+    console.error("Error fetching comment IDs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
