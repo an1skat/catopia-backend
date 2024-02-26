@@ -10,15 +10,23 @@ const commentSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
-    users: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
+    users: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  cat: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 27,
   },
 });
 

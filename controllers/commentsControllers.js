@@ -11,6 +11,7 @@ export const createComment = async (req, res) => {
 
     const doc = new CommentModel({
       text: req.body.text,
+      cat: req.body.cat,
       user: user,
     });
 
@@ -114,10 +115,16 @@ export const getComment = async (req, res) => {
 }
 export const getComments = async (req, res) => {
   try {
-    const commentIds = await CommentModel.find().distinct("_id");
+    const catId = req.query.catId;
+
+    if (!catId || isNaN(catId) || catId < 1 || catId > 27) {
+      return res.status(400).json({ error: "Invalid catId parameter" });
+    }
+
+    const commentIds = await CommentModel.find({ cat: catId }).distinct("_id");
     res.json({ commentIds });
   } catch (error) {
     console.error("Error fetching comment IDs:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
