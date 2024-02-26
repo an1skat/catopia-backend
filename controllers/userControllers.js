@@ -263,49 +263,25 @@ export const changePassword = async (req, res) => {
 export const uploadAvatar = async (req, res) => {
   try {
     const user = await UserModel.findById(req.userId);
-    const fileName = uuidv4() + ".jpg";
 
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ message: "Файл не предоставлен" });
+    const base64String = req.body.file; // Получаем base64-код из тела запроса
+
+    if (!base64String) {
+      return res.status(400).json({ message: 'Строка с base64 не предоставлена' });
     }
 
-    const file = req.files.file;
+    // Сохраняем base64-код в поле avatar пользователя
+    user.avatar = base64String;
+    user.save();
 
-    const fileExtension = path.extname(file.name).toLowerCase();
-    if (fileExtension !== ".jpg" && fileExtension !== ".png") {
-      return res
-        .status(400)
-        .json({ message: "Разрешены только файлы с расширением .jpg и .png" });
-    }
-
-    const currentFilePath = fileURLToPath(import.meta.url);
-    // Получаем директорию controllers
-    const controllersDir = path.dirname(currentFilePath);
-    // Получаем корневую директорию проекта
-    const projectDir = path.resolve(controllersDir, "..");
-    // Собираем путь к папке uploads
-    const AVATAR_PATH = path.resolve(projectDir, "uploads");
-
-    const filePath = path.resolve(AVATAR_PATH, fileName);
-
-    file.mv(filePath, (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Ошибка загрузки файла" });
-      }
-
-      user.avatar = fileName;
-      user.save();
-
-      return res.json({
-        message: "Аватар загружен",
-        filePath: filePath, // Добавляем путь к файлу в ответ
-      });
+    return res.json({
+      message: 'Аватар загружен',
+      base64String: base64String, // Можете вернуть base64-код в ответе, если нужно
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Не удалось загрузить аватар",
+      message: 'Не удалось загрузить аватар',
     });
   }
 };
